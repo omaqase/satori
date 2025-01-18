@@ -10,9 +10,9 @@ type Resend struct {
 	Client *resend.Client
 }
 
-func NewResendClient(config config.ResendConfig) *Resend {
+func NewResendClient(config config.Config) *Resend {
 	return &Resend{
-		Client: resend.NewClient(config.ApiKey),
+		Client: resend.NewClient(config.Resend.ApiKey),
 	}
 }
 

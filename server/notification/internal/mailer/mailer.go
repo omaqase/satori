@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/omaqase/satori/notification/pkg/validators"
 	protobuf "github.com/omaqase/satori/notification/protobuf/gen"
-	"google.golang.org/grpc"
 )
 
 type Mailer struct {
@@ -17,7 +16,7 @@ func NewMailer(resend *Resend) *Mailer {
 	}
 }
 
-func (m *Mailer) SendNotification(ctx context.Context, in *protobuf.SendNotificationRequest, opts ...grpc.CallOption) (*protobuf.SendNotificationResponse, error) {
+func (m *Mailer) SendNotification(ctx context.Context, in *protobuf.SendNotificationRequest) (*protobuf.SendNotificationResponse, error) {
 	out := &protobuf.SendNotificationResponse{}
 
 	if err := validators.ValidateNotificationRequest(in); err != nil {

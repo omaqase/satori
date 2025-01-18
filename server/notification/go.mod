@@ -9,6 +9,8 @@ require (
 )
 
 require (
+	github.com/joho/godotenv v1.5.1 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/resend/resend-go/v2 v2.14.0 // indirect
 	go.uber.org/dig v1.18.0 // indirect
 	go.uber.org/fx v1.23.0 // indirect
