@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/omaqase/satori/gateway/internal/config"
 	"github.com/omaqase/satori/gateway/internal/proxy"
+	"google.golang.org/grpc/grpclog"
 )
 
 func main() {
@@ -11,5 +12,7 @@ func main() {
 		panic(err)
 	}
 
-	proxy.SetupProxy(configs)
+	if err := proxy.SetupProxy(configs); err != nil {
+		grpclog.Fatal(err)
+	}
 }

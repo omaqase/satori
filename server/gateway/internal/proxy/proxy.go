@@ -2,55 +2,62 @@ package proxy
 
 import (
 	"context"
-	"fmt"
-	"log"
-	"net/http"
-
+	"flag"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/omaqase/satori/gateway/internal/config"
 	"github.com/omaqase/satori/gateway/internal/notification/protobuf"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"net/http"
 )
 
-func SetupProxy(config config.Config) {
-	gatewayMux := runtime.NewServeMux()
+var (
+	grpcServerEndpoint = flag.String("grpc-server-endpoint", "localhost:50054", "gRPC server endpoint")
+)
 
-	grpcNotificationConnection, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", config.NotificationService.Host, config.NotificationService.Port),
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	defer grpcNotificationConnection.Close()
+func SetupProxy(config config.Config) error {
+	//gatewayMux := runtime.NewServeMux()
 
-	err = protobuf.RegisterNotificationServiceHandler(context.Background(), gatewayMux, grpcNotificationConnection)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
+	//grpcNotificationConnection, err := grpc.Dial(
+	//	"localhost:50054",
+	//	grpc.WithInsecure(),
+	//)
+	//log.Println("q")
+	//if err != nil {
+	//	log.Fatalf(err.Error())
+	//}
+	//defer grpcNotificationConnection.Close()
+	//
+	//err = protobuf.RegisterNotificationServiceHandler(context.Background(), gatewayMux, grpcNotificationConnection)
+	//if err != nil {
+	//	log.Fatalf(err.Error())
+	//}
 
-	mux := http.NewServeMux()
-	mux.Handle("/api/v1", gatewayMux)
+	//mux := http.NewServeMux()
+	//mux.Handle("/api/v1", gatewayMux)
+	//mux.HandleFunc("/", helloworld)
 
-	fmt.Println(config)
-	http.ListenAndServe(":"+config.App.Port, mux)
-}
+	//swaggerPath := "swagger/notification.swagger.json" // Путь к Swagger-файлу
+	//mux.HandleFunc("/swagger/", func(w http.ResponseWriter, r *http.Request) {
+	//	http.ServeFile(w, r, swaggerPath)
+	//})
+	//
+	//fmt.Println(config)
+	//http.ListenAndServe(":"+config.App.Port, mux)
 
-func SetupGRPCConnection(gatewayMux *runtime.ServeMux, config config.Config) error {
-	grpcNotificationConnection, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", config.NotificationService.Host, config.NotificationService.Port),
-		grpc.WithInsecure(),
-	)
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	// Register gRPC server endpoint
+	// Note: Make sure the gRPC server is running properly and accessible
+	mux := runtime.NewServeMux()
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	err := protobuf.RegisterNotificationServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)
 	if err != nil {
 		return err
 	}
-	defer grpcNotificationConnection.Close()
 
-	err = protobuf.RegisterNotificationServiceHandler(context.Background(), gatewayMux, grpcNotificationConnection)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	return nil
+	// Start HTTP server (and proxy calls to gRPC server endpoint)
+	return http.ListenAndServe(":8081", mux)
 }
