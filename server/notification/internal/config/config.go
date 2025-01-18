@@ -13,32 +13,38 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Port string
+	Port string `envconfig:"PORT"` // добавляем тег
 }
 
 type ResendConfig struct {
-	ApiKey string
+	ApiKey string `envconfig:"APIKEY"` // добавляем тег
 }
 
-func NewConfig() (*Config, error) {
-	config := &Config{}
+func NewConfig() (Config, error) {
+	var config Config
 
 	root, err := os.Getwd()
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
 	err = godotenv.Load(filepath.Join(root, ".env"))
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
-	if err = envconfig.Process("APP", config.App); err != nil {
-		return nil, err
+	// Обрабатываем каждую секцию конфигурации отдельно
+	if err := envconfig.Process("APP", &config.App); err != nil {
+		return Config{}, err
 	}
 
-	if err = envconfig.Process("RESEND", config.Resend); err != nil {
-		return nil, err
+	if err := envconfig.Process("RESEND", &config.Resend); err != nil {
+		return Config{}, err
+	}
+
+	// Добавим проверку, что порт установлен
+	if config.App.Port == "" {
+		config.App.Port = "50054" // значение по умолчанию
 	}
 
 	return config, nil

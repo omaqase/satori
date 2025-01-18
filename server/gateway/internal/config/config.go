@@ -23,25 +23,25 @@ type (
 	}
 )
 
-func NewConfig() (*Config, error) {
-	config := &Config{}
+func NewConfig() (Config, error) {
+	var config Config
 
 	root, err := os.Getwd()
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
 	err = godotenv.Load(filepath.Join(root, ".env"))
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
-	if err = envconfig.Process("NOTIFICATION_SERVICE", config.NotificationService); err != nil {
-		return nil, err
+	if err = envconfig.Process("NOTIFICATION_SERVICE", &config.NotificationService); err != nil {
+		return Config{}, err
 	}
 
-	if err = envconfig.Process("PORT", config.App); err != nil {
-		return nil, err
+	if err = envconfig.Process("APP", &config.App); err != nil {
+		return Config{}, err
 	}
 
 	return config, nil

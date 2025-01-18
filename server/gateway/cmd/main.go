@@ -11,8 +11,5 @@ func main() {
 		panic(err)
 	}
 
-	err = proxy.SetupProxy(configs)
-	if err != nil {
-		panic(err)
-	}
+	proxy.SetupProxy(configs)
 }

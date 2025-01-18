@@ -15,6 +15,7 @@ func main() {
 			mailer.NewMailer,
 			grpc.NewGRPCServer,
 		),
+		fx.Invoke(func(config *grpc.Server) {}),
 	)
 
 	app.Run()

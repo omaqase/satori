@@ -18,15 +18,3 @@ lint-fast: install-linter
 .PHONY: buf-dep-update
 buf-dep-update:
 	cd protobuf && buf dep update
-
-.PHONY: buf-lint
-buf-lint:
-	cd protobuf && buf lint
-
-.PHONY: buf-generate
-buf-generate:
-	cd protobuf && buf generate
-
-.PHONY:
-run-standalone:
-	go run cmd/main.go
